@@ -1,57 +1,32 @@
 const express=require('express');
+const {connectionMondodb}=require('./connection')
+const {logReqRes} =require('./midlleware/index')
+const Userroter=require('./routes/user');
+
 
 const aap=express();
-const users=require('./MOCK_DATA.json')
-
-
 
 const PORT=8000;
 
-// Rotes
-aap.get('/users',(req,res)=>{
-    const html=`
-    <ul>
-    ${
-    users.map(user=>`<li>${user.first_name}</li>`)
-    }
-    </ul>
-    `
-    return res.send(html); 
-})
 
 
-// RESTAPI
-
-aap.get('/api/users',(req,res)=>{
-    console.log("server 1");
+// connection of mongodb
+connectionMondodb("mongodb://127.0.0.1:27017/youtube-app-1").then(()=>{
+    console.log("mongodb connected");
     
-    return res.json(users)
-})
-
-// Dyanmic id search
-aap.get('/api/users/:id',(req,res)=>{
-    const id=Number(req.params.id);
-    const user=users.find((user)=>user.id===id);
-
-    return res.json(user); 
-})
-
-// PST API
-aap.post('api/users',(req,res)=>{
-    return res.json({status:"pending"});
-})
-
-// PATCH API
-aap.patch('api/users/:id',(req,res)=>{
-    return res.json({status:"pending"});
-})
+});
 
 
-// DELETE API
-aap.delete('api/users/:id',(req,res)=>{
-    return res.json({status:"pending"});
-})
 
+// middleware-plugin
+aap.use(express.urlencoded({extended:false}));
+
+
+// Create Middleware 
+aap.use(logReqRes('log.txt'));
+
+// routes
+aap.use("/api/users",Userroter);
 
 
 
